@@ -1,0 +1,10 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: gyre
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: oci://ghcr.io/entropy0120/charts/gyre
+  ref:
+    semver: '>=0.7.0'

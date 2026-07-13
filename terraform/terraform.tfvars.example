@@ -1,0 +1,47 @@
+cluster_name        = "my-cluster"
+controlplane_ip     = "192.168.1.xx"
+controlplane_gateway = "192.168.1xx"
+controlplane_dns    = ["1.1.1.1", "8.8.8.8"]
+controlplane_subnet = "24"
+controlplane_interface = "enp3s0"
+install_disk        = "/dev/nvme0n1"
+node_ip             = "192.168.1.xx"
+talos_version       = "v1.13.4"
+
+# Tailscale OAuth Client (สร้างที่ https://login.tailscale.com/admin/settings/oauth)
+# Expiration: Never, Scopes: Devices Core write + Devices Routes write + Auth Keys write
+# Tags: k8s-operator (แค่ tag เดียว!)
+tailscale_oauth_client_id     = "your-client-id"
+tailscale_oauth_client_secret = "your-client-secret"
+tailscale_tags               = ["tag:k8s", "tag:talos"]
+tailscale_operator_tag       = "tag:k8s-operator"
+
+flux_repository = "https://github.com/YOUR_USER/talos-deployment.git"
+tailscale_domain    = "tailxxxxx.ts.net"  # MagicDNS domain จาก Tailscale admin console
+backup_bucket       = "backup"            # MinIO bucket สำหรับเก็บ backup ทั้งหมด
+backup_retention_db    = 14               # retention days database backup
+backup_retention_vault = 30               # retention days vault snapshot
+
+#--- GitHub Token สำหรับ clone private app repo (ไม่ขึ้น git) ---
+# Fine-Grained PAT: Repository access → เฉพาะ repo, Permissions → Contents: Read-only
+# Classic PAT: scope repo
+github_token = "your-github-pat"
+
+#--- Vault Secrets (ไม่ขึ้น git อยู่ใน .gitignore) ---
+vault_postgres_password   = "change-me-postgres"
+vault_pguser_password     = "change-me-pguser"
+vault_minio_root_user     = "admin"
+vault_minio_root_password = "change-me-minio"
+
+#--- App Repositories (Flux GitOps Multi-Repo --- ใช้ semver tag บังคับ) ---
+# namespaces (optional): namespace ที่ app นี้ deploy ไป — จะถูกเพิ่มใน kubernetesTalosAPIAccess
+# เพื่อให้ pods ใน namespace นั้นเข้าถึง Talos API (os:reader + os:operator) สำหรับอ่าน log
+app_repos = [
+  {
+    name       = "app-deployment"
+    url        = "https://github.com/YOUR_USER/app-deployment"
+    semver     = ">=1.0.0"
+    path       = "./clusters/base"
+    namespaces = "myapp"     # optional — ถ้าไม่ระบุจะได้แค่ os:reader (system namespaces)
+  },
+]

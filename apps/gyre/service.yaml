@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: gyre-tailscale
+  namespace: flux-ui
+  annotations:
+    tailscale.com/expose: "true"
+    tailscale.com/hostname: flux-ui
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9001
+      targetPort: 3000
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/instance: gyre
+    app.kubernetes.io/name: gyre

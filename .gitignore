@@ -1,0 +1,24 @@
+# Terraform
+terraform/.terraform/
+terraform/terraform.tfstate*
+terraform/.terraform.lock.hcl
+terraform/*.tfvars
+
+# Talos CLI configs
+talosconfig
+.talosconfig
+talos-config
+
+# Kubernetes kubeconfig (various names)
+kubeconfig
+.kubeconfig
+terraform/ops-kubeconfig
+
+# Secrets (any dir named secrets/, any .enc.yaml file)
+**/secrets/**
+**/*.enc.yaml
+secrets.yaml
+
+# OS
+.DS_Store
+Thumbs.db

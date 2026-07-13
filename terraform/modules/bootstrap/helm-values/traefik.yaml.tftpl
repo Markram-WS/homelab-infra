@@ -1,0 +1,26 @@
+deployment:
+  enabled: true
+  replicas: 1
+env:
+  - name: TZ
+    value: Asia/Bangkok
+ingressClass:
+  enabled: true
+  isDefaultClass: true
+ingressRoute:
+  dashboard:
+    enabled: true
+    matchRule: Host(`traefik.local`)%{ if tailscale_domain != "" } || Host(`traefik.${tailscale_domain}`)%{ endif }
+    entryPoints: ["web"]
+service:
+  type: ClusterIP
+  annotations:
+    tailscale.com/expose: "true"
+    tailscale.com/hostname: traefik
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi

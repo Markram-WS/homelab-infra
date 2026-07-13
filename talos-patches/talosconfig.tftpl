@@ -1,0 +1,8 @@
+context: admin@${cluster_name}
+contexts:
+  admin@${cluster_name}:
+    endpoints:
+      - ${endpoint}
+    ca: ${ca_b64}
+    crt: ${crt_b64}
+    key: ${key_b64}

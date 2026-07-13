@@ -1,0 +1,52 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: vault-auto-unseal
+  namespace: vault
+spec:
+  schedule: "*/15 * * * *"
+  timeZone: "Asia/Bangkok"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: vault-auto-unseal
+          restartPolicy: OnFailure
+          securityContext:
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: unsealer
+              image: bitnami/kubectl:latest
+              env:
+                - name: TZ
+                  value: Asia/Bangkok
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
+              command:
+                - /bin/bash
+                - -ec
+                - |
+                  if ! kubectl get pod vault-0 -n vault -o jsonpath='{.status.phase}' | grep -q Running; then
+                    echo "vault-0 not running, skipping"
+                    exit 0
+                  fi
+
+                  if kubectl exec vault-0 -n vault -- vault status 2>&1 | grep -q "Sealed.*true"; then
+                    echo "Vault is sealed — unsealing..."
+                    UNSEAL_KEY=$(kubectl get secret vault-keys -n vault -o jsonpath='{.data.unseal_key}' | base64 -d)
+                    kubectl exec vault-0 -n vault -- vault operator unseal "$UNSEAL_KEY"
+                    echo "Vault unsealed successfully"
+                  else
+                    echo "Vault is already unsealed"
+                  fi
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi

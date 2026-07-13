@@ -1,0 +1,34 @@
+server:
+  extraEnvironmentVars:
+    TZ: Asia/Bangkok
+  dev:
+    enabled: false
+  standalone:
+    enabled: false
+  ha:
+    enabled: true
+    replicas: 1
+    raft:
+      enabled: true
+      setNodeId: true
+      config: |
+        ui = true
+        listener "tcp" {
+          address = "0.0.0.0:8200"
+          cluster_address = "0.0.0.0:8201"
+          tls_disable = true
+        }
+        storage "raft" {
+          path = "/vault/data"
+          node_id = "vault-0"
+        }
+        service_registration "kubernetes" {}
+  service:
+    type: ClusterIP
+  dataStorage:
+    enabled: true
+    size: 128Mi
+    storageClass: "local-path"
+ui:
+  enabled: true
+  serviceType: ClusterIP

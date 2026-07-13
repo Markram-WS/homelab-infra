@@ -1,0 +1,7 @@
+extraEnv:
+  - name: TZ
+    value: Asia/Bangkok
+tags:
+%{ for tag in split(",", tags) ~}
+  - ${trimspace(tag)}
+%{ endfor ~}

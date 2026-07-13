@@ -1,0 +1,18 @@
+machine:
+  network:
+    interfaces:
+      - interface: ${interface}
+        addresses:
+          - ${ip}/${subnet}
+        routes:
+          - network: 0.0.0.0/0
+            gateway: ${gateway}
+        dhcp: false
+      - interface: dummy0
+        addresses:
+          - 10.0.0.1/32
+        dhcp: false
+    nameservers:
+%{ for dns in split(",", dns_servers) ~}
+      - ${trimspace(dns)}
+%{ endfor ~}

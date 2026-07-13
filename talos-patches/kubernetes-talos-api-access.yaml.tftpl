@@ -1,0 +1,11 @@
+machine:
+  features:
+    kubernetesTalosAPIAccess:
+      enabled: true
+      allowedRoles:
+        - os:reader
+        - os:operator
+      allowedKubernetesNamespaces:
+%{ for ns in namespaces ~}
+        - ${ns}
+%{ endfor ~}

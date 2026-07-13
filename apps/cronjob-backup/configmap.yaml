@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pg-dump-script
+  namespace: database
+data:
+  backup.sh: |
+    #!/bin/sh
+    set -e
+
+    TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+    BACKUP_FILE="db-postgresql-$TIMESTAMP.sql.gz"
+
+    echo "Starting PostgreSQL backup at $(date)"
+
+    PGPASSWORD="$PGPASSWORD" pg_dump \
+      -h "$PGHOST" \
+      -U "$PGUSER" \
+      -d "$PGDATABASE" \
+      --clean \
+      --if-exists \
+      --no-owner \
+      --no-privileges | gzip > "/tmp/$BACKUP_FILE"
+
+    echo "Backup complete: $BACKUP_FILE ($(stat -c%s "/tmp/$BACKUP_FILE") bytes)"
+
+    if [ -n "$MINIO_ENDPOINT" ]; then
+      echo "Uploading to MinIO..."
+      mc alias set homelab "$MINIO_ENDPOINT" "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY"
+      mc mb "homelab/${backup_bucket}" --ignore-existing
+      mc cp "/tmp/$BACKUP_FILE" "homelab/${backup_bucket}/database/$BACKUP_FILE"
+      mc rm "homelab/${backup_bucket}/database/" --recursive --older-than ${backup_retention_db}d
+      echo "Upload complete!"
+      rm -f "/tmp/$BACKUP_FILE"
+    else
+      echo "MinIO not configured, backup left at /tmp/$BACKUP_FILE"
+    fi
+
+    echo "Backup finished at $(date)"
