@@ -50,6 +50,17 @@ roleRef:
   name: view
 ---
 apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: vault-backup-minio
+  namespace: minio
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames: ["minio-secret"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: vault-backup-minio
@@ -60,5 +71,5 @@ subjects:
     namespace: vault
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: view
+  kind: Role
+  name: vault-backup-minio

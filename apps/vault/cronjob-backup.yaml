@@ -41,12 +41,12 @@ spec:
                   echo "Uploading snapshot to MinIO..."
                   MINIO_ACCESS_KEY=$(kubectl get secret minio-secret -n minio -o jsonpath='{.data.root-user}' | base64 -d)
                   MINIO_SECRET_KEY=$(kubectl get secret minio-secret -n minio -o jsonpath='{.data.root-password}' | base64 -d)
-                  mc alias set homelab http://minio.minio.svc.cluster.local:9000 "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY"
-                  mc mb "homelab/${backup_bucket}" --ignore-existing
-                  kubectl exec vault-0 -n vault -- vault operator raft snapshot save - | mc pipe "homelab/${backup_bucket}/vault/$SNAP_FILE"
+                  mcli alias set homelab http://minio.minio.svc.cluster.local:9000 "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY"
+                  mcli mb "homelab/backup" --ignore-existing
+                  kubectl exec vault-0 -n vault -- vault operator raft snapshot save - | mcli pipe "homelab/backup/vault/$SNAP_FILE"
                   echo "Snapshot uploaded: $SNAP_FILE"
 
                   # Cleanup old snapshots
-                  mc rm "homelab/${backup_bucket}/vault/" --recursive --older-than ${backup_retention_vault}d || true
+                  mcli rm --force "homelab/backup/vault/" --recursive --older-than 30d || true
 
                   echo "Vault backup finished at $(date)"

@@ -26,10 +26,10 @@ data:
 
     if [ -n "$MINIO_ENDPOINT" ]; then
       echo "Uploading to MinIO..."
-      mc alias set homelab "$MINIO_ENDPOINT" "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY"
-      mc mb "homelab/${backup_bucket}" --ignore-existing
-      mc cp "/tmp/$BACKUP_FILE" "homelab/${backup_bucket}/database/$BACKUP_FILE"
-      mc rm "homelab/${backup_bucket}/database/" --recursive --older-than ${backup_retention_db}d
+      mcli alias set homelab "$MINIO_ENDPOINT" "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY"
+      mcli mb "homelab/backup" --ignore-existing
+      mcli cp "/tmp/$BACKUP_FILE" "homelab/backup/database/$BACKUP_FILE"
+      mcli rm --force "homelab/backup/database/" --recursive --older-than 14d || true
       echo "Upload complete!"
       rm -f "/tmp/$BACKUP_FILE"
     else
