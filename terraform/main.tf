@@ -126,7 +126,19 @@ resource "kubernetes_manifest" "flux_kustomization_app" {
 # ======== RBAC สำหรับ ops-user (เครื่องอื่น monitor + deploy service) ========
 
 locals {
-  repos_with_ns = { for r in var.app_repos : r.name => r if r.namespaces != null }
+  repos_with_ns  = { for r in var.app_repos : r.name => r if r.namespaces != null }
+  app_namespaces = toset([for r in var.app_repos : r.namespaces if r.namespaces != null])
+}
+
+resource "kubernetes_namespace" "app" {
+  for_each = local.app_namespaces
+
+  metadata {
+    name = each.value
+    labels = {
+      "pod-security.kubernetes.io/enforce" = "privileged"
+    }
+  }
 }
 
 resource "kubernetes_cluster_role_v1" "cluster_readonly" {
@@ -221,7 +233,8 @@ resource "kubernetes_cluster_role_binding_v1" "cluster_readonly" {
 }
 
 resource "kubernetes_role_v1" "svc_writer" {
-  for_each = local.repos_with_ns
+  for_each   = local.repos_with_ns
+  depends_on = [kubernetes_namespace.app]
 
   metadata {
     name      = "svc-writer"
@@ -234,9 +247,9 @@ resource "kubernetes_role_v1" "svc_writer" {
     verbs      = ["get", "list", "watch", "create", "update", "patch", "delete"]
   }
 }
-
 resource "kubernetes_role_binding_v1" "svc_writer" {
-  for_each = local.repos_with_ns
+  for_each   = local.repos_with_ns
+  depends_on = [kubernetes_namespace.app]
 
   metadata {
     name      = "svc-writer"
