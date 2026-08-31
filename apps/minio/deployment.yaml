@@ -44,11 +44,13 @@ spec:
                   key: root-password
       containers:
         - name: minio
-          image: ghcr.io/snazy/maxio-release:latest
+          image: docker.io/pgsty/silo:latest
           imagePullPolicy: IfNotPresent
           args:
             - server
             - /data
+            - --console-address
+            - ":9001"
           env:
             - name: TZ
               value: Asia/Bangkok
@@ -65,7 +67,7 @@ spec:
           ports:
             - containerPort: 9000
               name: api
-            - containerPort: 9090
+            - containerPort: 9001
               name: console
           volumeMounts:
             - name: data
