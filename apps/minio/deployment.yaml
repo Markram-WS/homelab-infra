@@ -44,13 +44,11 @@ spec:
                   key: root-password
       containers:
         - name: minio
-          image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
+          image: ghcr.io/snazy/maxio-release:latest
           imagePullPolicy: IfNotPresent
           args:
             - server
             - /data
-            - --console-address
-            - ":9001"
           env:
             - name: TZ
               value: Asia/Bangkok
@@ -67,7 +65,7 @@ spec:
           ports:
             - containerPort: 9000
               name: api
-            - containerPort: 9001
+            - containerPort: 9090
               name: console
           volumeMounts:
             - name: data
