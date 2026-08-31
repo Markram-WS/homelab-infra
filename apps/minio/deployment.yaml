@@ -17,7 +17,8 @@ spec:
     spec:
       initContainers:
         - name: create-buckets
-          image: quay.io/minio/mc:latest
+          image: quay.io/minio/mc:RELEASE.2025-08-13T08-35-41Z
+          imagePullPolicy: IfNotPresent
           command:
             - /bin/sh
             - -c
@@ -43,7 +44,8 @@ spec:
                   key: root-password
       containers:
         - name: minio
-          image: quay.io/minio/minio:latest
+          image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
+          imagePullPolicy: IfNotPresent
           args:
             - server
             - /data
